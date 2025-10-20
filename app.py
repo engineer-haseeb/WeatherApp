@@ -93,7 +93,7 @@ def create_weather_report(weather, forecast_df):
     return output
 
 # --- STREAMLIT UI ---
-st.set_page_config(page_title="🌤 Weather Forecast by HS", layout="wide")
+st.set_page_config(page_title="🌤 Weather Forecast by Hani-汉哈尼", layout="wide")
 
 # --- LOGO AND TITLE ---
 logo_path = "logo.png"
@@ -107,7 +107,7 @@ st.markdown(
     <div style="display:flex; align-items:center;">
         <img src="data:image/png;base64,{encoded_logo}" 
              style="width:35mm; height:45mm; margin-right:15px;">
-        <h1 style='color: #1E90FF; margin:0;'>🌤 Weather Forecast by HS</h1>
+        <h1 style='color: #1E90FF; margin:0;'>🌤 Weather Forecast by Hani-汉哈尼</h1>
     </div>
     <hr>
     """,
