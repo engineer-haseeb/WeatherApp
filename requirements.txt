@@ -1,0 +1,7 @@
+streamlit
+requests
+geocoder
+pandas
+folium
+streamlit-folium
+pyttsx3
