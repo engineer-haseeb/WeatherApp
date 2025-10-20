@@ -136,7 +136,7 @@ if city:
         if forecast_df is not None:
             st.subheader("📈 5-Day Forecast (五天预测) ")
             st.line_chart(forecast_df[['datetime','temperature']].set_index('datetime'))
-            st.bar_chart(forecast_df[['datetime','humidity']].set_index('datetime-日期时间'))
+            st.bar_chart(forecast_df[['datetime','humidity']].set_index('datetime'))
 
         # Map
         st.subheader("📍 Location Map")
@@ -146,13 +146,13 @@ if city:
         folium_static(m)
 
         # Voice
-        if st.button("🔊 Click to Speak"):
+        if st.button("🔊 Click to Speak-点击发言"):
             speak_weather(weather, use_offline=(use_tts=="Offline (pyttsx3)"))
 
         # Download report
         report_file = create_weather_report(weather, forecast_df)
         st.download_button(
-            "📥 Download Weather Report",
+            "📥 Download Weather Report-下载天气预报",
             data=report_file.getvalue(),
             file_name=f"Weather_Report_{weather['city']}.txt",
             mime="text/plain"
