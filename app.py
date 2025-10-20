@@ -94,26 +94,37 @@ def create_weather_report(weather, forecast_df):
 # --- STREAMLIT UI ---
 st.set_page_config(page_title="🌤 Weather Forecast by HS", layout="wide")
 
-# --- LOGO DISPLAY ---
-logo_path = os.path.join(os.getcwd(), "logo.png")
+# --- LOGO DISPLAY USING CSS ---
+logo_path = "logo.png"
 
-# Left corner small logo
-st.image(logo_path, width=80, use_column_width=False)
-
-# Center large transparent logo
 st.markdown(
     f"""
     <style>
+    /* Left corner small logo */
+    .left-logo {{
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        width: 80px;
+        height: auto;
+        z-index: 1000;
+    }}
+    
+    /* Center large transparent logo */
     .center-logo {{
         position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         opacity: 0.1;
+        width: 400px;
+        height: auto;
         z-index: 0;
     }}
     </style>
-    <img src='{logo_path}' class='center-logo'>
+
+    <img src="{logo_path}" class="left-logo">
+    <img src="{logo_path}" class="center-logo">
     """,
     unsafe_allow_html=True
 )
