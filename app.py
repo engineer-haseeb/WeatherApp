@@ -146,13 +146,13 @@ if city:
         folium_static(m)
 
         # Voice
-        if st.button("🔊 Click to Speak-点击发言"):
+        if st.button("🔊 Click to Speak"):
             speak_weather(weather, use_offline=(use_tts=="Offline (pyttsx3)"))
 
         # Download report
         report_file = create_weather_report(weather, forecast_df)
         st.download_button(
-            "📥 Download Weather Report-下载天气预报 ",
+            "📥 Download Weather Report",
             data=report_file.getvalue(),
             file_name=f"Weather_Report_{weather['city']}.txt",
             mime="text/plain"
