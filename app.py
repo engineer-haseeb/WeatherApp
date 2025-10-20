@@ -99,7 +99,7 @@ st.set_page_config(page_title="🌤 Weather Forecast by HS", layout="wide")
 st.markdown(
     """
     <div style="position: fixed; top: 10px; left: 10px; z-index:1000;">
-        <img src='logo.png' width="80">
+        <img src='logo' width="80">
     </div>
     """,
     unsafe_allow_html=True
@@ -109,7 +109,7 @@ st.markdown(
 st.markdown(
     """
     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity:0.1; z-index:0;">
-        <img src='logo.png' width="400">
+        <img src='logo' width="400">
     </div>
     """,
     unsafe_allow_html=True
