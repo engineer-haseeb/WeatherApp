@@ -89,36 +89,18 @@ def create_weather_report(weather, forecast_df):
 # --- STREAMLIT UI ---
 st.set_page_config(page_title="🌤 Weather Forecast by HS", layout="wide")
 
-# --- CENTER RESPONSIVE TRANSPARENT LOGO ---
+# --- TITLE WITH LOGO ---
 logo_path = os.path.join(os.getcwd(), "logo.png")
 st.markdown(
     f"""
-    <style>
-    .center-logo {{
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        opacity: 0.08;
-        width: 30vw;
-        max-width: 400px;
-        height: auto;
-        z-index: 0;
-        pointer-events: none;
-    }}
-    .stApp {{
-        position: relative;
-        z-index: 1;
-    }}
-    </style>
-    <img src="{logo_path}" class="center-logo">
+    <div style="display:flex; align-items:center;">
+        <img src="{logo_path}" alt="Logo" style="width:35mm; height:45mm; margin-right:15px;">
+        <h1 style='color: #1E90FF; margin:0;'>🌤 Weather Forecast by HS</h1>
+    </div>
+    <hr>
     """,
     unsafe_allow_html=True
 )
-
-# Title
-st.markdown("<h1 style='text-align: center; color: #1E90FF;'>🌤 Weather Forecast by HS</h1>", unsafe_allow_html=True)
-st.markdown("<hr>", unsafe_allow_html=True)
 
 # Sidebar
 st.sidebar.header("City Selection-城市选择")
