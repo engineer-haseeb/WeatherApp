@@ -94,7 +94,7 @@ def create_weather_report(weather, forecast_df):
 # --- STREAMLIT UI ---
 st.set_page_config(page_title="🌤 Weather Forecast by HS", layout="wide")
 
-# --- CENTER TRANSPARENT LOGO ---
+# --- CENTER RESPONSIVE TRANSPARENT LOGO ---
 logo_path = os.path.join(os.getcwd(), "logo.png")
 st.markdown(
     f"""
@@ -104,11 +104,18 @@ st.markdown(
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        opacity: 0.08;  /* watermark transparency */
-        width: 400px;    /* adjust size as needed */
+        opacity: 0.08;          /* watermark transparency */
+        width: 30vw;             /* responsive width relative to viewport */
+        max-width: 400px;        /* maximum size */
         height: auto;
-        z-index: 0;      /* behind all content */
-        pointer-events: none; /* clicks go through */
+        z-index: 0;              /* behind all content */
+        pointer-events: none;    /* clicks go through logo */
+    }}
+
+    /* Ensure Streamlit content stays above logo */
+    .stApp {{
+        position: relative;
+        z-index: 1;
     }}
     </style>
     <img src="{logo_path}" class="center-logo">
@@ -121,11 +128,11 @@ st.markdown("<h1 style='text-align: center; color: #1E90FF;'>🌤 Weather Foreca
 st.markdown("<hr>", unsafe_allow_html=True)
 
 # Sidebar
-st.sidebar.header("City Selection")
-manual_city = st.sidebar.text_input("Enter City Name")
-use_tts = st.sidebar.radio("Select anyone for better voice results", ["(pyttsx3)", "(gTTS)"])
-st.sidebar.markdown("Leave empty to auto-detect your location.")
-st.sidebar.markdown("We have Features: Map, Alerts, Voice, Download")
+st.sidebar.header("City Selection-城市选择")
+manual_city = st.sidebar.text_input("Enter City Name-输入城市名称")
+use_tts = st.sidebar.radio("Select anyone for better voice results(选择任何人以获得更好的语音效果)", ["(pyttsx3)", "(gTTS)"])
+st.sidebar.markdown("if Leave empty bar then auto-detect your current location (如果保留空白栏则自动检测您的当前位置).")
+st.sidebar.markdown("We have Features: Map, Alerts, Voice, Download(我们有以下功能：地图、警报、语音、下载)")
 
 # Determine city
 if manual_city:
@@ -142,7 +149,7 @@ if city:
     forecast_df = get_forecast(city)
     if weather:
         # --- Current Weather ---
-        st.subheader(f"Current Weather in {weather['city']}")
+        st.subheader(f"当前天气-Current Weather in {weather['city']}")
         col1, col2, col3, col4 = st.columns(4)
         col1.metric("🌡 Temperature (温度) (°C)", f"{weather['temperature']}°C", f"Feels like {weather['feels_like']}°C")
         col2.metric("💧 Humidity (湿度) (%)", f"{weather['humidity']}%")
