@@ -15,14 +15,12 @@ API_KEY = "61a356e45c3c4a375acd2d04114070db"
 
 # --- FUNCTIONS ---
 def get_location():
-    """Detect user location using IP"""
     g = geocoder.ip('me')
     if g.ok:
         return g.city, g.latlng
     return None, (0, 0)
 
 def get_weather(city):
-    """Fetch current weather data"""
     try:
         url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
         response = requests.get(url, timeout=10)
@@ -44,7 +42,6 @@ def get_weather(city):
     return None
 
 def get_forecast(city):
-    """Fetch 5-day forecast"""
     try:
         url = f"http://api.openweathermap.org/data/2.5/forecast?q={city}&appid={API_KEY}&units=metric"
         response = requests.get(url, timeout=10)
@@ -63,7 +60,6 @@ def get_forecast(city):
     return None
 
 def speak_weather(weather, use_offline=True):
-    """Speak weather report"""
     text = f"Hello Mr.Hani! Today in {weather['city']}, temperature is {weather['temperature']}°C, feels like {weather['feels_like']}°C. Condition: {weather['description']}. Humidity is {weather['humidity']}%."
     try:
         if use_offline:
@@ -80,7 +76,6 @@ def speak_weather(weather, use_offline=True):
         st.warning(f"Text-to-speech error: {e}")
 
 def create_weather_report(weather, forecast_df):
-    """Generate a downloadable report"""
     output = StringIO()
     output.write(f"Weather Report for {weather['city']}\n")
     output.write(f"Temperature: {weather['temperature']}°C (Feels like {weather['feels_like']}°C)\n")
@@ -104,15 +99,13 @@ st.markdown(
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        opacity: 0.08;          /* watermark transparency */
-        width: 30vw;             /* responsive width relative to viewport */
-        max-width: 400px;        /* maximum size */
+        opacity: 0.08;
+        width: 30vw;
+        max-width: 400px;
         height: auto;
-        z-index: 0;              /* behind all content */
-        pointer-events: none;    /* clicks go through logo */
+        z-index: 0;
+        pointer-events: none;
     }}
-
-    /* Ensure Streamlit content stays above logo */
     .stApp {{
         position: relative;
         z-index: 1;
@@ -137,9 +130,8 @@ st.sidebar.markdown("We have Features: Map, Alerts, Voice, Download(我们有以
 # Determine city
 if manual_city:
     city = manual_city
-    coords = (0,0)
 else:
-    city, coords = get_location()
+    city, _ = get_location()
     if not city:
         st.warning("Location not detected. Please enter city manually.")
 
@@ -148,7 +140,6 @@ if city:
     weather = get_weather(city)
     forecast_df = get_forecast(city)
     if weather:
-        # --- Current Weather ---
         st.subheader(f"当前天气-Current Weather in {weather['city']}")
         col1, col2, col3, col4 = st.columns(4)
         col1.metric("🌡 Temperature (温度) (°C)", f"{weather['temperature']}°C", f"Feels like {weather['feels_like']}°C")
@@ -157,30 +148,25 @@ if city:
         col4.metric("🌥 Condition", weather['description'])
         st.markdown("---")
 
-        # Alerts
         if weather['temperature'] > 35:
             st.warning("⚠️ Heatwave Alert! Stay hydrated (热浪警报！注意补水).")
         if "rain" in weather['description'].lower():
             st.info("☔ Rain Alert! Carry an umbrella (下雨警报！带伞).")
 
-        # Forecast Charts
         if forecast_df is not None:
             st.subheader("📈 5-Day Forecast (五天预测) ")
             st.line_chart(forecast_df[['datetime','temperature']].set_index('datetime'))
             st.bar_chart(forecast_df[['datetime','humidity']].set_index('datetime'))
 
-        # Map
         st.subheader("📍 Location Map")
         map_center = [weather['lat'], weather['lon']]
         m = folium.Map(location=map_center, zoom_start=8)
         folium.Marker(location=map_center, popup=f"{weather['city']}").add_to(m)
         folium_static(m)
 
-        # Voice
         if st.button("🔊 Click to Speak-点击发言"):
             speak_weather(weather, use_offline=(use_tts=="(pyttsx3)"))
 
-        # Download report
         report_file = create_weather_report(weather, forecast_df)
         st.download_button(
             "📥 Download Weather Report-下载天气预报",
