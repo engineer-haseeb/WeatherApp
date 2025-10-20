@@ -95,22 +95,25 @@ def create_weather_report(weather, forecast_df):
 st.set_page_config(page_title="🌤 Weather Forecast by HS", layout="wide")
 
 # --- LOGO DISPLAY ---
+logo_path = os.path.join(os.getcwd(), "logo.png")
+
 # Left corner small logo
-st.markdown(
-    """
-    <div style="position: fixed; top: 10px; left: 10px; z-index:1000;">
-        <img src='logo' width="80">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+st.image(logo_path, width=80, use_column_width=False)
 
 # Center large transparent logo
 st.markdown(
-    """
-    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity:0.1; z-index:0;">
-        <img src='logo' width="400">
-    </div>
+    f"""
+    <style>
+    .center-logo {{
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.1;
+        z-index: 0;
+    }}
+    </style>
+    <img src='{logo_path}' class='center-logo'>
     """,
     unsafe_allow_html=True
 )
