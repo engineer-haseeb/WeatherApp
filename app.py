@@ -1,74 +1,86 @@
+# --- IMPORTS ---
 import streamlit as st
 import requests
-from gtts import gTTS
-import os
 import geocoder
 import pandas as pd
 import folium
 from streamlit_folium import folium_static
-import pyttsx3
 from io import StringIO
+import pyttsx3
+from gtts import gTTS
+import os
 
 # --- CONFIG ---
 API_KEY = "61a356e45c3c4a375acd2d04114070db"
 
 # --- FUNCTIONS ---
 def get_location():
+    """Detect user location using IP"""
     g = geocoder.ip('me')
     if g.ok:
         return g.city, g.latlng
     return None, (0, 0)
 
-def speak_weather(text):
-    tts = gTTS(text=text, lang="en")
-    filename = "weather.mp3"
-    tts.save(filename)
-    st.audio(filename, format="audio/mp3")
-
-
 def get_weather(city):
-    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        weather = {
-            "city": data["name"],
-            "temperature": data["main"]["temp"],
-            "feels_like": data["main"]["feels_like"],
-            "humidity": data["main"]["humidity"],
-            "wind_speed": data["wind"]["speed"],
-            "description": data["weather"][0]["description"].title(),
-            "lat": data["coord"]["lat"],
-            "lon": data["coord"]["lon"]
-        }
-        return weather
-    else:
-        return None
+    """Fetch current weather data"""
+    try:
+        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            weather = {
+                "city": data["name"],
+                "temperature": data["main"]["temp"],
+                "feels_like": data["main"]["feels_like"],
+                "humidity": data["main"]["humidity"],
+                "wind_speed": data["wind"]["speed"],
+                "description": data["weather"][0]["description"].title(),
+                "lat": data["coord"]["lat"],
+                "lon": data["coord"]["lon"]
+            }
+            return weather
+    except Exception as e:
+        st.error(f"Error fetching weather: {e}")
+    return None
 
 def get_forecast(city):
-    url = f"http://api.openweathermap.org/data/2.5/forecast?q={city}&appid={API_KEY}&units=metric"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        forecast_list = data['list']
-        df = pd.DataFrame()
-        df['datetime'] = [item['dt_txt'] for item in forecast_list]
-        df['temperature'] = [item['main']['temp'] for item in forecast_list]
-        df['humidity'] = [item['main']['humidity'] for item in forecast_list]
-        df['wind_speed'] = [item['wind']['speed'] for item in forecast_list]
-        df['condition'] = [item['weather'][0]['description'].title() for item in forecast_list]
-        return df
-    else:
-        return None
+    """Fetch 5-day forecast"""
+    try:
+        url = f"http://api.openweathermap.org/data/2.5/forecast?q={city}&appid={API_KEY}&units=metric"
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            df = pd.DataFrame({
+                'datetime': [item['dt_txt'] for item in data['list']],
+                'temperature': [item['main']['temp'] for item in data['list']],
+                'humidity': [item['main']['humidity'] for item in data['list']],
+                'wind_speed': [item['wind']['speed'] for item in data['list']],
+                'condition': [item['weather'][0]['description'].title() for item in data['list']]
+            })
+            return df
+    except Exception as e:
+        st.error(f"Error fetching forecast: {e}")
+    return None
 
-def speak_weather(weather):
-    engine = pyttsx3.init()
-    text = f"Hello Mr. Hani. Today in {weather['city']}, temperature is {weather['temperature']} degrees Celsius, feels like {weather['feels_like']}. Condition: {weather['description']}. Humidity is {weather['humidity']} percent."
-    
-    engine.say(text)
-    engine.runAndWait()
+def speak_weather(weather, use_offline=True):
+    """Speak weather report"""
+    text = f"Hello! Today in {weather['city']}, temperature is {weather['temperature']}°C, feels like {weather['feels_like']}°C. Condition: {weather['description']}. Humidity is {weather['humidity']}%."
+    try:
+        if use_offline:
+            engine = pyttsx3.init()
+            engine.say(text)
+            engine.runAndWait()
+        else:
+            tts = gTTS(text=text, lang='en')
+            filename = "weather.mp3"
+            tts.save(filename)
+            st.audio(filename, format="audio/mp3")
+            os.remove(filename)
+    except Exception as e:
+        st.warning(f"Text-to-speech error: {e}")
 
 def create_weather_report(weather, forecast_df):
+    """Generate a downloadable report"""
     output = StringIO()
     output.write(f"Weather Report for {weather['city']}\n")
     output.write(f"Temperature: {weather['temperature']}°C (Feels like {weather['feels_like']}°C)\n")
@@ -80,76 +92,70 @@ def create_weather_report(weather, forecast_df):
     return output
 
 # --- STREAMLIT UI ---
-st.set_page_config(page_title="🌤 Advanced Weather App", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="🌤 Advanced Weather App", layout="wide")
 st.markdown("<h1 style='text-align: center; color: #1E90FF;'>🌤 Advanced Weather App</h1>", unsafe_allow_html=True)
 st.markdown("<hr>", unsafe_allow_html=True)
 
 # Sidebar
 st.sidebar.header("City Selection")
 manual_city = st.sidebar.text_input("Enter city manually")
+use_tts = st.sidebar.radio("Voice Report:", ["Offline (pyttsx3)", "Online (gTTS)"])
 st.sidebar.markdown("💡 Leave empty to auto-detect your location.")
-st.sidebar.markdown("⚡ Advanced Features: Map, Alerts, Voice, Download")
+st.sidebar.markdown("⚡ Features: Map, Alerts, Voice, Download")
 
-# Detect user location
+# Determine city
 if manual_city:
     city = manual_city
-    weather_lat, weather_lon = 0, 0
+    coords = (0,0)
 else:
     city, coords = get_location()
-    weather_lat, weather_lon = coords
     if not city:
-        st.error("Location not detected. Please enter city manually.")
+        st.warning("Location not detected. Please enter city manually.")
 
-# Fetch current weather
+# Fetch data
 if city:
     weather = get_weather(city)
     forecast_df = get_forecast(city)
     if weather:
-        # --- Current Weather Card ---
+        # --- Current Weather ---
         st.subheader(f"Current Weather in {weather['city']}")
         col1, col2, col3, col4 = st.columns(4)
-        col1.metric(label="🌡 Temperature (°C)", value=f"{weather['temperature']}°C", delta=f"Feels like {weather['feels_like']}°C")
-        col2.metric(label="💧 Humidity (%)", value=f"{weather['humidity']}%")
-        col3.metric(label="💨 Wind Speed (m/s)", value=f"{weather['wind_speed']} m/s")
-        col4.metric(label="🌥 Condition", value=weather['description'])
-        
+        col1.metric("🌡 Temperature (°C)", f"{weather['temperature']}°C", f"Feels like {weather['feels_like']}°C")
+        col2.metric("💧 Humidity (%)", f"{weather['humidity']}%")
+        col3.metric("💨 Wind Speed (m/s)", f"{weather['wind_speed']} m/s")
+        col4.metric("🌥 Condition", weather['description'])
         st.markdown("---")
-        
-        # --- Weather Alerts ---
+
+        # Alerts
         if weather['temperature'] > 40:
             st.warning("⚠️ Heatwave Alert! Stay hydrated.")
         if "rain" in weather['description'].lower():
             st.info("☔ Rain Alert! Carry an umbrella.")
-        
-        # --- 5-Day Forecast Charts ---
+
+        # Forecast Charts
         if forecast_df is not None:
-            st.subheader("📈 5-Day Forecast (3-hour interval)")
-            st.markdown("### Temperature Trend")
-            st.line_chart(forecast_df[['datetime', 'temperature']].set_index('datetime'), height=300)
-            st.markdown("### Humidity Trend")
-            st.bar_chart(forecast_df[['datetime', 'humidity']].set_index('datetime'), height=300)
-        
-        # --- Interactive Map ---
+            st.subheader("📈 5-Day Forecast")
+            st.line_chart(forecast_df[['datetime','temperature']].set_index('datetime'))
+            st.bar_chart(forecast_df[['datetime','humidity']].set_index('datetime'))
+
+        # Map
         st.subheader("📍 Location Map")
         map_center = [weather['lat'], weather['lon']]
         m = folium.Map(location=map_center, zoom_start=8)
         folium.Marker(location=map_center, popup=f"{weather['city']}").add_to(m)
         folium_static(m)
-        
-        # --- Voice Report Button ---
+
+        # Voice
         if st.button("🔊 Speak Weather Report"):
-            speak_weather(weather)
-        
-        # --- Download Weather Report ---
+            speak_weather(weather, use_offline=(use_tts=="Offline (pyttsx3)"))
+
+        # Download report
         report_file = create_weather_report(weather, forecast_df)
         st.download_button(
-            label="📥 Download Weather Report",
+            "📥 Download Weather Report",
             data=report_file.getvalue(),
             file_name=f"Weather_Report_{weather['city']}.txt",
             mime="text/plain"
         )
-        
     else:
         st.error("Weather data not found. Please check city name.")
-
-
