@@ -64,7 +64,7 @@ def get_forecast(city):
 
 def speak_weather(weather, use_offline=True):
     """Speak weather report"""
-    text = f"Hello! Today in {weather['city']}, temperature is {weather['temperature']}°C, feels like {weather['feels_like']}°C. Condition: {weather['description']}. Humidity is {weather['humidity']}%."
+    text = f"Hello Mr.Hani! Today in {weather['city']}, temperature is {weather['temperature']}°C, feels like {weather['feels_like']}°C. Condition: {weather['description']}. Humidity is {weather['humidity']}%."
     try:
         if use_offline:
             engine = pyttsx3.init()
@@ -92,16 +92,16 @@ def create_weather_report(weather, forecast_df):
     return output
 
 # --- STREAMLIT UI ---
-st.set_page_config(page_title="🌤 Advanced Weather App", layout="wide")
+st.set_page_config(page_title="🌤 Weather Forecast by HS", layout="wide")
 st.markdown("<h1 style='text-align: center; color: #1E90FF;'>🌤 Advanced Weather App</h1>", unsafe_allow_html=True)
 st.markdown("<hr>", unsafe_allow_html=True)
 
 # Sidebar
 st.sidebar.header("City Selection")
-manual_city = st.sidebar.text_input("Enter city manually")
-use_tts = st.sidebar.radio("Voice Report:", ["Offline (pyttsx3)", "Online (gTTS)"])
-st.sidebar.markdown("💡 Leave empty to auto-detect your location.")
-st.sidebar.markdown("⚡ Features: Map, Alerts, Voice, Download")
+manual_city = st.sidebar.text_input("Enter City Name")
+use_tts = st.sidebar.radio("Voice Report:", ["For PC service (pyttsx3)", "For Cloud Service (gTTS)"])
+st.sidebar.markdown("Leave empty to auto-detect your location.")
+st.sidebar.markdown("We have Features: Map, Alerts, Voice, Download")
 
 # Determine city
 if manual_city:
@@ -120,23 +120,23 @@ if city:
         # --- Current Weather ---
         st.subheader(f"Current Weather in {weather['city']}")
         col1, col2, col3, col4 = st.columns(4)
-        col1.metric("🌡 Temperature (°C)", f"{weather['temperature']}°C", f"Feels like {weather['feels_like']}°C")
-        col2.metric("💧 Humidity (%)", f"{weather['humidity']}%")
-        col3.metric("💨 Wind Speed (m/s)", f"{weather['wind_speed']} m/s")
+        col1.metric("🌡 Temperature (温度) (°C)", f"{weather['temperature']}°C", f"Feels like {weather['feels_like']}°C")
+        col2.metric("💧 Humidity (湿度) (%)", f"{weather['humidity']}%")
+        col3.metric("💨 Wind Speed (风速) (m/s)", f"{weather['wind_speed']} m/s")
         col4.metric("🌥 Condition", weather['description'])
         st.markdown("---")
 
         # Alerts
-        if weather['temperature'] > 40:
-            st.warning("⚠️ Heatwave Alert! Stay hydrated.")
+        if weather['temperature'] > 35:
+            st.warning("⚠️ Heatwave Alert! Stay hydrated (热浪警报！注意补水).")
         if "rain" in weather['description'].lower():
-            st.info("☔ Rain Alert! Carry an umbrella.")
+            st.info("☔ Rain Alert! Carry an umbrella (下雨警报！带伞).")
 
         # Forecast Charts
         if forecast_df is not None:
-            st.subheader("📈 5-Day Forecast")
-            st.line_chart(forecast_df[['datetime','temperature']].set_index('datetime'))
-            st.bar_chart(forecast_df[['datetime','humidity']].set_index('datetime'))
+            st.subheader("📈 5-Day Forecast (五天预测) ")
+            st.line_chart(forecast_df[['datetime-日期时间','temperature-温度']].set_index('datetime-日期时间'))
+            st.bar_chart(forecast_df[['datetime-日期时间','humidity-湿度']].set_index('datetime-日期时间'))
 
         # Map
         st.subheader("📍 Location Map")
@@ -146,13 +146,13 @@ if city:
         folium_static(m)
 
         # Voice
-        if st.button("🔊 Speak Weather Report"):
+        if st.button("🔊 Click to Speak-点击发言"):
             speak_weather(weather, use_offline=(use_tts=="Offline (pyttsx3)"))
 
         # Download report
         report_file = create_weather_report(weather, forecast_df)
         st.download_button(
-            "📥 Download Weather Report",
+            "📥 Download Weather Report-下载天气预报 ",
             data=report_file.getvalue(),
             file_name=f"Weather_Report_{weather['city']}.txt",
             mime="text/plain"
