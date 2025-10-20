@@ -99,7 +99,7 @@ st.markdown("<hr>", unsafe_allow_html=True)
 # Sidebar
 st.sidebar.header("City Selection")
 manual_city = st.sidebar.text_input("Enter City Name")
-use_tts = st.sidebar.radio("Voice Report:", ["For PC service (pyttsx3)", "For Cloud Service (gTTS)"])
+use_tts = st.sidebar.radio("Select anyone for better voice results", ["(pyttsx3)", "(gTTS)"])
 st.sidebar.markdown("Leave empty to auto-detect your location.")
 st.sidebar.markdown("We have Features: Map, Alerts, Voice, Download")
 
