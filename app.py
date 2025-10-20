@@ -93,7 +93,7 @@ def create_weather_report(weather, forecast_df):
 
 # --- STREAMLIT UI ---
 st.set_page_config(page_title="🌤 Weather Forecast by HS", layout="wide")
-st.markdown("<h1 style='text-align: center; color: #1E90FF;'>🌤 Advanced Weather App</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #1E90FF;'>🌤 Weather Forecast by HS</h1>", unsafe_allow_html=True)
 st.markdown("<hr>", unsafe_allow_html=True)
 
 # Sidebar
@@ -135,8 +135,8 @@ if city:
         # Forecast Charts
         if forecast_df is not None:
             st.subheader("📈 5-Day Forecast (五天预测) ")
-            st.line_chart(forecast_df[['datetime-日期时间','temperature-温度']].set_index('datetime-日期时间'))
-            st.bar_chart(forecast_df[['datetime-日期时间','humidity-湿度']].set_index('datetime-日期时间'))
+            st.line_chart(forecast_df[['datetime','temperature']].set_index('datetime'))
+            st.bar_chart(forecast_df[['datetime','humidity']].set_index('datetime-日期时间'))
 
         # Map
         st.subheader("📍 Location Map")
